@@ -75,7 +75,7 @@ defaultWidget :: Yesod m => PageWidget m
 defaultWidget = paginationWidget defaultPageWidgetConfig
 
 -- | A widget showing pagination links. Follows bootstrap principles.
---   Utilizes a \"p\" GET param but leaves all other GET params intact.
+--   Utilizes a \"page\" GET param but leaves all other GET params intact.
 paginationWidget :: Yesod m => PageWidgetConfig -> PageWidget m
 paginationWidget (PageWidgetConfig {..}) page per tot = do
     -- total / per + 1 for any remainder
@@ -135,7 +135,7 @@ paginationWidget (PageWidgetConfig {..}) page per tot = do
                       , nextLink
                       ]
 
--- | looks up the GET param (e.g. "page") and converts it to an Int. returns a
+-- | looks up the GET param (e.g. \"page\") and converts it to an Int. returns a
 --   default of 1 when conversion fails.
 getCurrentPage :: Yesod m => ParamName -> HandlerT m IO Int
 getCurrentPage paramName = liftM (fromMaybe 1 . go) $ lookupGetParam paramName
