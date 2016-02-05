@@ -1,4 +1,3 @@
-{-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE TypeFamilies      #-}
@@ -59,6 +58,7 @@ module Yesod.Paginator
 import Yesod
 import Yesod.Paginator.Widget
 
+
 paginate :: Yesod m => Int -> [a] -> HandlerT m IO ([a], WidgetT m IO ())
 paginate = paginateWith defaultWidget
 
@@ -68,7 +68,7 @@ paginateWith :: Yesod m
              -> [a]
              -> HandlerT m IO ([a], WidgetT m IO ())
 paginateWith widget per items = do
-    p <- getCurrentPage
+    p <- getCurrentPage "page"
 
     let tot = length items
     let  xs = take per $ drop ((p - 1) * per) items
@@ -97,7 +97,7 @@ selectPaginatedWith :: ( PersistEntity val
                     -> [SelectOpt val]
                     -> YesodDB m ([Entity val], WidgetT m IO ())
 selectPaginatedWith widget per filters selectOpts = do
-    p   <- lift getCurrentPage
+    p   <- lift $ getCurrentPage "page"
     tot <- count filters
     xs  <- selectList filters (selectOpts ++ [OffsetBy ((p-1)*per), LimitTo per])
 

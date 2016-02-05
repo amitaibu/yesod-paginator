@@ -21,6 +21,8 @@ import qualified Data.Text as T
 -- | currentPage, itemsPerPage, totalItems -> widget
 type PageWidget m = Int -> Int -> Int -> WidgetT m IO ()
 
+type ParamName = Text
+
 data PageWidgetConfig = PageWidgetConfig
     { prevText     :: Text   -- ^ The text for the 'previous page' link.
     , nextText     :: Text   -- ^ The text for the 'next page' link.
@@ -38,9 +40,9 @@ data PageLink = Enabled Int Text Text -- ^ page, content, class
               | Disabled    Text Text -- ^ content, class
 
 -- | Correctly show one of the constructed links
-showLink :: [(Text, Text)] -> PageLink -> WidgetT m IO ()
-showLink params (Enabled pg cnt cls) = do
-    let param = ("p", showT pg)
+showLink :: [(Text, Text)] -> ParamName -> PageLink -> WidgetT m IO ()
+showLink params paramName (Enabled pg cnt cls) = do
+    let param = (paramName, showT pg)
 
     [whamlet|$newline never
         <li .#{cls}>
@@ -53,7 +55,7 @@ showLink params (Enabled pg cnt cls) = do
                                         . map (\(k,v) -> k `T.append` "=" `T.append` v)
                                         . (++ [(p, n)]) . filter ((/= p) . fst) $ getParams
 
-showLink _ (Disabled cnt cls) =
+showLink _ _ (Disabled cnt cls) =
     [whamlet|$newline never
         <li .#{cls} .disabled>
             <a>#{cnt}
@@ -78,6 +80,7 @@ paginationWidget :: Yesod m => PageWidgetConfig -> PageWidget m
 paginationWidget (PageWidgetConfig {..}) page per tot = do
     -- total / per + 1 for any remainder
     let pages = (\(n, r) -> n + (min r 1)) $ tot `divMod` per
+    let paramName = "page"
 
     when (pages > 1) $ do
         curParams <- handlerToWidget $ liftM reqGetParams getRequest
@@ -85,7 +88,7 @@ paginationWidget (PageWidgetConfig {..}) page per tot = do
         [whamlet|$newline never
             <ul class="#{cls}">
                 $forall link <- buildLinks page pages
-                    ^{showLink curParams link}
+                    ^{showLink curParams paramName link}
             |]
 
     where
@@ -132,10 +135,10 @@ paginationWidget (PageWidgetConfig {..}) page per tot = do
                       , nextLink
                       ]
 
--- | looks up the \"p\" GET param and converts it to an Int. returns a
+-- | looks up the GET param (e.g. "page") and converts it to an Int. returns a
 --   default of 1 when conversion fails.
-getCurrentPage :: Yesod m => HandlerT m IO Int
-getCurrentPage = liftM (fromMaybe 1 . go) $ lookupGetParam "p"
+getCurrentPage :: Yesod m => ParamName -> HandlerT m IO Int
+getCurrentPage paramName = liftM (fromMaybe 1 . go) $ lookupGetParam paramName
 
     where
         go :: Maybe Text -> Maybe Int

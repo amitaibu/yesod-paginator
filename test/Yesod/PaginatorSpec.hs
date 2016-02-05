@@ -36,7 +36,7 @@ spec = withApp $ do
                 ]
 
             request $ do
-                addGetParam "p" "88"
+                addGetParam "page" "88"
                 setUrl $ RootR 1142
 
             statusIs 200
