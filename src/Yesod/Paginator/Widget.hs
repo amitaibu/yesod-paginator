@@ -23,6 +23,11 @@ type PageWidget m = Int -> Int -> Int -> WidgetT m IO ()
 
 type ParamName = Text
 
+data PaginatorConfig = PaginatorConfig
+    { widget :: PageWidgetConfig
+    , paramName :: ParamName
+    }
+
 data PageWidgetConfig = PageWidgetConfig
     { prevText     :: Text   -- ^ The text for the 'previous page' link.
     , nextText     :: Text   -- ^ The text for the 'next page' link.
