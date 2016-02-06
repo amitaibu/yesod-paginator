@@ -76,6 +76,12 @@ defaultPageWidgetConfig = PageWidgetConfig { prevText     = "«"
                                            , listClasses  = ["pagination"]
                                            }
 
+defaultPaginatorConfig :: PaginatorConfig
+defaultPaginatorConfig = PaginatorConfig
+    { widget = defaultPageWidgetConfig
+    , paramName = "page"
+    }
+
 defaultWidget :: Yesod m => PageWidget m
 defaultWidget = paginationWidget defaultPageWidgetConfig
 
