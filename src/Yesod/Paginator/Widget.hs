@@ -23,11 +23,6 @@ type PageWidget m = Int -> Int -> Int -> WidgetT m IO ()
 
 type ParamName = Text
 
-data PaginatorConfig = PaginatorConfig
-    { widget :: PageWidgetConfig
-    , paramName :: ParamName
-    }
-
 data PageWidgetConfig = PageWidgetConfig
     { prevText     :: Text   -- ^ The text for the 'previous page' link.
     , nextText     :: Text   -- ^ The text for the 'next page' link.
@@ -36,6 +31,7 @@ data PageWidgetConfig = PageWidgetConfig
     , showEllipsis :: Bool   -- ^ Whether to show an ellipsis if there are
                              --   more pages than pageCount
     , listClasses  :: [Text] -- ^ Additional classes for top level list
+    , paramName    :: ParamName -- ^ The query string param name.
     }
 
 -- | Individual links to pages need to follow strict (but sane) markup
@@ -74,19 +70,15 @@ defaultPageWidgetConfig = PageWidgetConfig { prevText     = "«"
                                            , ascending    = True
                                            , showEllipsis = True
                                            , listClasses  = ["pagination"]
+                                           , paramName  = ["p"]
                                            }
-
-defaultPaginatorConfig :: PaginatorConfig
-defaultPaginatorConfig = PaginatorConfig
-    { widget = defaultPageWidgetConfig
-    , paramName = "page"
-    }
 
 defaultWidget :: Yesod m => PageWidget m
 defaultWidget = paginationWidget defaultPageWidgetConfig
 
 -- | A widget showing pagination links. Follows bootstrap principles.
---   Utilizes a \"page\" GET param but leaves all other GET params intact.
+--   Utilizes a GET param (\"p\" by default) but leaves all other GET params
+--   intact.
 paginationWidget :: Yesod m => PageWidgetConfig -> PageWidget m
 paginationWidget (PageWidgetConfig {..}) page per tot = do
     -- total / per + 1 for any remainder
